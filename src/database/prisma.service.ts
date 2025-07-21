@@ -1,9 +1,10 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { LoggerService } from 'src/common/logger-v2/logger.service';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  constructor() {
+  constructor(private readonly logger: LoggerService) {
     super({
       log: [
         { emit: 'event', level: 'query' },
@@ -21,22 +22,27 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     // Enable query logging in development
     if (process.env.NODE_ENV === 'development') {
       client.$on('query', (event: any) => {
-        console.log('Query: ' + event.query);
-        console.log('Params: ' + event.params);
-        console.log('Duration: ' + event.duration + 'ms');
+        this.logger.logDatabaseQuery(event.query, event.duration, undefined);
+        // console.log('Query: ' + event.query);
+        // console.log('Params: ' + event.params);
+        // console.log('Duration: ' + event.duration + 'ms');
       });
     }
 
     client.$on('error', (event: any) => {
-      console.error('Prisma Error:', event);
+      this.logger.error('Prisma Error', undefined, 'PrismaService', {
+        target: event.target,
+        message: event.message,
+      });
     });
 
     // Connect to the database
     await this.$connect();
-    console.log('Connected to the database');
+    this.logger.log('Connected to the database', 'PrismaService');
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
+    this.logger.log('Disconnected from the database', 'PrismaService');
   }
 }

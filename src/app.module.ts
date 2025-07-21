@@ -1,9 +1,12 @@
 import { CacheModule } from '@nestjs/cache-manager';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { LoggerModule } from './common/logger/logger.module';
+import { LoggerInterceptor } from './common/logger-v2/logger.interceptor';
+import { LoggerMiddleware } from './common/logger-v2/logger.middleware';
+import { LoggerModule } from './common/logger-v2/logger.module';
 import { validate } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -45,5 +48,15 @@ import { UsersModule } from './modules/users/users.module';
     AuthModule,
     UsersModule,
   ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggerInterceptor,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

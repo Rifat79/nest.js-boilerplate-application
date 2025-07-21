@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { PaginatedResult } from '../../common/interfaces/paginated-result.interface';
 import { PrismaService } from '../../database/prisma.service';
@@ -11,7 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.prisma.user.findUnique({
@@ -40,9 +36,7 @@ export class UsersService {
         }
       : {};
 
-    const orderBy = sortBy
-      ? { [sortBy]: sortOrder }
-      : { createdAt: 'desc' as const };
+    const orderBy = sortBy ? { [sortBy]: sortOrder } : { createdAt: 'desc' as const };
 
     const [users, totalItems] = await Promise.all([
       this.prisma.user.findMany({

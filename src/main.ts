@@ -1,4 +1,4 @@
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -8,11 +8,14 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptors';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { LoggerService } from './common/logger-v2/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const logger = new Logger('Bootstrap');
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
 
   // Security
   app.use(helmet());
@@ -47,7 +50,7 @@ async function bootstrap() {
 
   // Global filters and interceptors
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
+  app.useGlobalInterceptors(new LoggingInterceptor(logger), new TransformInterceptor());
 
   // Swagger documentation
   if (configService.get('NODE_ENV') !== 'production') {
