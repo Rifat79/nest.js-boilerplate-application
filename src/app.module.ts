@@ -7,11 +7,17 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerInterceptor } from './common/logger-v2/logger.interceptor';
 import { LoggerMiddleware } from './common/logger-v2/logger.middleware';
 import { LoggerModule } from './common/logger-v2/logger.module';
+import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
 import { validate } from './config/env.validation';
+import jwtConfig from './config/jwt.config';
+import redisConfig from './config/redis.config';
+import swaggerConfig from './config/swagger.config';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -20,6 +26,7 @@ import { UsersModule } from './modules/users/users.module';
       isGlobal: true,
       validate,
       cache: true,
+      load: [appConfig, redisConfig, jwtConfig, databaseConfig, swaggerConfig],
     }),
 
     // Rate limiting
@@ -47,6 +54,9 @@ import { UsersModule } from './modules/users/users.module';
     // Feature modules
     AuthModule,
     UsersModule,
+
+    // Caching modules
+    RedisModule,
   ],
   providers: [
     {
