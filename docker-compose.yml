@@ -8,11 +8,9 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/nestjs_boilerplate
-      - JWT_SECRET=your-super-secret-jwt-key
-      - JWT_EXPIRES_IN=7d
-      - CORS_ORIGINS=http://localhost:3000
+      - NODE_ENV=production
+    env_file:
+      - ./.env
     depends_on:
       - postgres
       - redis
@@ -28,7 +26,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=nestjs_boilerplate
     ports:
-      - '5432:5432'
+      - '5452:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -42,7 +40,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - '8080:8080'
+      - '8088:8080'
     depends_on:
       - postgres
 
