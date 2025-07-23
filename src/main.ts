@@ -55,14 +55,16 @@ async function bootstrap() {
   // Swagger documentation
   if (configService.get('NODE_ENV') !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('NestJS Boilerplate API')
-      .setDescription('Production-ready NestJS API with best practices')
-      .setVersion('1.0')
+      .setTitle(configService.get('swagger.docTitle'))
+      .setDescription(configService.get('swagger.docDescription'))
+      .setVersion(configService.get('swagger.docVersion'))
       .addBearerAuth()
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document);
+    SwaggerModule.setup('docs', app, document, {
+      customSiteTitle: configService.get('swagger.siteTitle'),
+    });
   }
 
   const port = configService.get('PORT') || 3000;
